@@ -1,15 +1,14 @@
 package Ex2;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-
 /**
  * class for second algorithm
  * @author Alexey Titov &   Shalom Weinberger
  * @version 2.0
  */
 //libraries
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import com.csvreader.CsvReader;

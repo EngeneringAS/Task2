@@ -7,25 +7,24 @@ package UTest;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import Ex1.Location;
-import Ex1.WIFI;
 import Ex2.ClassOfAlgorithm1;
 
 class ClassOfAlgorithm1Test {
 	//check get MAC
 	@Test
 	final void testGetMAC() {
-		WIFI wifi=new WIFI();
-		assertEquals("N\\A", wifi.getMAC());
-		wifi.setMAC("ec:8c:a2:26:ae:28");
-		assertSame("ec:8c:a2:26:ae:28", wifi.getMAC());
+		ClassOfAlgorithm1 tmp=new ClassOfAlgorithm1();
+		assertEquals("N\\A", tmp.getMAC());
+		tmp.setMAC("ec:8c:a2:26:ae:28");
+		assertSame("ec:8c:a2:26:ae:28", tmp.getMAC());
 	}
 	//check set MAC
 	@Test
 	final void testSetMAC() {
-		WIFI wifi=new WIFI();
-		assertEquals("N\\A", wifi.getMAC());
-		wifi.setMAC("ec:8c:a2:26:ae:28");
-		assertSame("ec:8c:a2:26:ae:28", wifi.getMAC());
+		ClassOfAlgorithm1 tmp=new ClassOfAlgorithm1();
+		assertEquals("N\\A", tmp.getMAC());
+		tmp.setMAC("ec:8c:a2:26:ae:28");
+		assertSame("ec:8c:a2:26:ae:28", tmp.getMAC());
 	}
 	//check set SignaList
 	@Test

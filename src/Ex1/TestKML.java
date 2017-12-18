@@ -303,8 +303,8 @@ public class TestKML extends JFrame {
         JOptionPane.showMessageDialog(null, "kml record saved");
 	}
 	/**
-	 * the function read csv files
-	 * @param csvFiles list of names cvs files
+	 * the function read csv file
+	 * @param csvFiles name cvs file
 	 * @return list of data for kml file
 	 */
 	public ArrayList<DataWIFI> ReadCSV(String csvFile)

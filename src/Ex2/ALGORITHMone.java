@@ -1,68 +1,37 @@
 package Ex2;
 /**
- * class for question 2
+ * class for first algorithm
  * @author Alexey Titov &   Shalom Weinberger
  * @version 2.0
  */
 //libraries
-import java.awt.*;
-import java.awt.event.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import com.csvreader.CsvReader;
+import com.csvreader.CsvWriter;
 import Ex1.DataWIFI;
 import Ex1.Location;
 import Ex1.WIFI;
 
-public class ALGORITHMone  extends JFrame 
+public class ALGORITHMone
 {
-	//variables
-	private JFormattedTextField MAC;												//text field of user MAC
-	//define
-	private static final long serialVersionUID = 1L;
-    private final  String  BUTTON_NAME = "OK";
-    private final int limit=3;
-    //constructor
-    public ALGORITHMone()
-    {
-        super("Entery MAC");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        //container panel
-        Container container = getContentPane();
-        //install the sequential location manager
-        container.setLayout(new FlowLayout());
-        //create a formatted MAC text field
-        container.add(new JLabel("MAC:"));
-        MAC = new JFormattedTextField("MAC");
-		MAC.setColumns(20);
-		container.add(MAC);
-        //create button
-        Action action = new SimpleAction();
-        JButton button = new JButton(action);
-        button.setName(BUTTON_NAME);
-        button.setText("OK");
-        button.setMnemonic('F');
-        container.add(button);
-        //display the window on the screen
-      	setContentPane(container);
-        setSize(280, 100);						//size of window
-        setVisible(true);						//make the panel visible
-        setResizable(false);					//disallow resizing to panel
-    }
     /**
      * the function read csv files
      * @param csvFiles list of names cvs files
      * @param MAC_NAME the MAC name whose data we need
      * @return up to limit data that we need
      */
-	private ArrayList<DataWIFI> ReadCSV(ArrayList<String> csvFiles,String MAC_NAME)
+	private static ALGOoneCLASS ReadCSV(ArrayList<String> csvFiles)
 	{
 		//variables
-		ArrayList<DataWIFI> dwf=new ArrayList<DataWIFI>();			//data of WiFiNetwork
+		ALGOoneCLASS dwf=new ALGOoneCLASS();
 		String IDphone="";											//id of cellular phone
 		CsvReader row =null;
 		//read file csv and filtering data
@@ -125,48 +94,12 @@ public class ALGORITHMone  extends JFrame
 							cnt+=wf.setSignal(Integer.parseInt(row.get(5)));
 						}catch(NumberFormatException e){
 							continue;
-						}	
-						tmpWIFI.setWiFi(wf);
-						tmpWIFI.setLla(place);
-						flagtime=tmpWIFI.setTIME(row.get(3));
-						tmpWIFI.setWIFINetwork(1);
-						//check if MAC,Signal,time and location are correct
-						if (cnt!=3 || cnt2!=2 || !flagtime	|| !wf.getMAC().equals(MAC_NAME))   
-							continue;
-						//first wifi
-						if (dwf.size()==0)
-							dwf.add(tmpWIFI);
-						else
-						{
-							int j;
-							for (j=0;j<dwf.size();j++)								//location is equals
-								if (dwf.get(j).getLla().compareLLA(tmpWIFI.getLla())==0)
-								{
-									if (dwf.get(j).getWiFi().get(0).getSignal()<tmpWIFI.getWiFi().get(0).getSignal())
-									{
-										dwf.get(j).getWiFi().get(0).setSignal(tmpWIFI.getWiFi().get(0).getSignal());
-										dwf.get(j).setID(tmpWIFI.getID());
-										dwf.get(j).setTIME(tmpWIFI.getTIME());
-									}
-									break;
-								}
-								//location is not equals
-								if (j==dwf.size())
-								{	
-									for (j=0;j<dwf.size();j++)								//signal is better
-										if (dwf.get(j).getWiFi().get(0).getSignal()<tmpWIFI.getWiFi().get(0).getSignal())
-										{
-											dwf.add(j, tmpWIFI);
-											break;
-										}
-								}
-								//up to limit
-								if (limit<dwf.size())
-									dwf.remove(limit);
-								else
-									if (limit>dwf.size())
-										dwf.add(tmpWIFI);
 						}
+						flagtime=tmpWIFI.setTIME(row.get(3));
+						//check if MAC,Signal,time and location are correct
+						if (cnt!=3 || cnt2!=2 || !flagtime)   
+							continue;
+						dwf.setDATAmac(wf.getMAC(),place,wf.getSignal());
 					}
 				}
 				row.close();
@@ -180,17 +113,75 @@ public class ALGORITHMone  extends JFrame
 			}
 			return dwf;
 	}
+	/**
+	 * the function write csv file
+	 * @param dwf list of data for csv file
+	 */
+	private static void WriteCSV(ALGOoneCLASS dwf)
+	{
+		//variable
+		String OUTcsvFile="";									//output csv file
+		HelpFunctions hlp=new HelpFunctions();
+		//select the location of the file
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("*.CSV","*.*");
+		JFileChooser fc = new JFileChooser();
+		fc.setFileFilter(filter);
+		if ( fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION ) {
+			try {
+				//user wrote at the end csv
+				if (fc.getSelectedFile().getAbsolutePath().substring(fc.getSelectedFile().getAbsolutePath().length()-4).equals(".csv"))
+					OUTcsvFile=fc.getSelectedFile().getAbsolutePath();
+				else 	//user did not wrote at the end csv
+					OUTcsvFile=fc.getSelectedFile().getAbsolutePath()+".csv";
+			}catch (Exception e ) {
+				JOptionPane.showMessageDialog(null, "an error occurred, the file was not saved.\ngoodbye");
+				return;
+			}
+		}
+		else	//user did not select a file to save
+		{
+			JOptionPane.showMessageDialog(null, "you did not select a file to save,\ngoodbye");
+		    return;
+	    }	
+		try {
+			// use FileWriter constructor that specifies open for appending
+			CsvWriter csvOutput = new CsvWriter(new FileWriter(OUTcsvFile, false), ',');	
+     		//headers for first row
+			csvOutput.write("latitude");	csvOutput.write("longitude");	csvOutput.write("altitude");
+			csvOutput.write("MAC");			csvOutput.write("Signal");
+			csvOutput.endRecord();
+			//write out a few rows
+			Map<String,ArrayList<LocSig>> tmp=dwf.getDATAmac();
+			//write rows of center location
+			for (Map.Entry<String,ArrayList<LocSig>> entry : tmp.entrySet())
+			{
+				ClassOfAlgorithm1 coa=new ClassOfAlgorithm1();			//data of MAC
+				Location center=new Location();
+				String str;
+				if (!coa.setMAC(entry.getKey()))
+					continue;
+				for (int i=0;i<entry.getValue().size();i++)
+					coa.setSignaList(entry.getValue().get(i).getSignal(),entry.getValue().get(i).getLla());
+				center=hlp.WriteWeight(coa);
+				str=center.toString()+coa.getMAC()+","+hlp.AverageSignal(coa);
+				csvOutput.writeRecord(str.split(","));
+			}
+			csvOutput.close();
+			JOptionPane.showMessageDialog(null, "csv record saved");
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, "csv record not saved");
+		}catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "csv record not saved");
+		}
+	}
     /**
 	 * the function processes the data of csv file 
 	 */
-    private void Program(String MAC_NAME)
+    private static void Program()
     {
     	//variables
     	ArrayList<String> files=new ArrayList<String>();		//list csv files
-    	ArrayList<DataWIFI> DWF=new ArrayList<DataWIFI>();		//data of WiFiNetwork
-    	ClassOfAlgorithm1 coa=new ClassOfAlgorithm1();			//data of MAC
-    	HelpFunctions hlp=new HelpFunctions();
-    	Location center=new Location();
+    	ALGOoneCLASS DWF=new ALGOoneCLASS();					//data of WiFiNetwork
     	int ret;
 		//File chooser
 		JFileChooser fileopen = new JFileChooser();
@@ -224,51 +215,15 @@ public class ALGORITHMone  extends JFrame
 		    System.exit(2);
 		}
 		else
-			DWF=ReadCSV(files,MAC_NAME);
-		coa=hlp.Exchange(DWF,MAC_NAME);
+			DWF=ReadCSV(files);
 		try {
-			center=hlp.WriteWeight(coa);
-			System.out.println(center.toString());
-			hlp.WriteKML(DWF,center);
+			WriteCSV(DWF);
 		}catch(NullPointerException e){
 			System.out.println("NULL :(");
-		} catch (IOException e) {
-			System.out.println("NULL :(");
 		}
-    } 
-    /**
-     * internal class
-     */
-    class SimpleAction extends AbstractAction {
-        private static final long serialVersionUID = 1L;
-        SimpleAction() {
-        	//command parameters
-            putValue(SHORT_DESCRIPTION, "If you want so, then click");
-        }
-        /**
-         * processing the button click event
-         */
-        public void actionPerformed(ActionEvent e) 
-        {
-            JButton btn = (JButton) e.getSource();
-            //user click OK
-            if (btn.getName().equalsIgnoreCase(BUTTON_NAME)) 
-            {
-            	//check if text field is null
-            	if (MAC.getValue().equals(""))
-            	{
-            		JOptionPane.showMessageDialog(null, "MAC field is null");
-            		return;
-            	}
-            	setVisible(false);
-            	//transference date from text field to string
-            	String ENTERY_MAC=MAC.getValue().toString();
-            	Program(ENTERY_MAC);
-                System.exit(0);
-            }
-        }
-    };
-    public static void main(String[] args) {
-        new ALGORITHMone();
+    }
+    public static void main(String[] args) 
+    {
+    	Program();
     }
 }

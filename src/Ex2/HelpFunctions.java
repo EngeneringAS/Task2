@@ -6,23 +6,11 @@ package Ex2;
  */
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.util.ArrayList;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.io.FileWriter;
-import java.io.IOException;
 import Ex1.DataWIFI;
 import Ex1.Location;
 import Ex1.WIFI;
-import de.micromata.opengis.kml.v_2_2_0.Document;
-import de.micromata.opengis.kml.v_2_2_0.Folder;
-import de.micromata.opengis.kml.v_2_2_0.Icon;
-import de.micromata.opengis.kml.v_2_2_0.Kml;
-import de.micromata.opengis.kml.v_2_2_0.Placemark;
-import de.micromata.opengis.kml.v_2_2_0.Style;
 
 public class HelpFunctions {
 	//define
@@ -36,13 +24,13 @@ public class HelpFunctions {
 	private final int diff_no_sig=100;
 	private final int limit=3;
 	//variables
-	private List<LaLoAlWe> points = new ArrayList<>();
+	private List<ALGOtwoCLASS> points = new ArrayList<>();
 	/**
 	 * the function adds data to the list
 	 * @param points-location and weight
 	 */
-	public void addAll(LaLoAlWe... points) { 
-		Collections.addAll(this.points, points); 
+	public void addAll(ALGOtwoCLASS... algOtwoCLASS) { 
+		Collections.addAll(this.points, algOtwoCLASS); 
 	}
 	/**
 	 * the function calculates the weight according to the first algorithm 
@@ -84,6 +72,26 @@ public class HelpFunctions {
 		return w_center;
 	}
 	/**
+	 * the function calculates the average signal
+	 * @param coa array from csv files
+	 * @return average signal
+	 */
+	public double AverageSignal(ClassOfAlgorithm1 coa)
+	{
+		double average=0;
+		int count=0;
+		if (coa.getSignaList().isEmpty())
+			return average;
+		for (Map.Entry<Location,Integer> entry : coa.getSignaList().entrySet())
+		{
+			//get key
+			double key = entry.getValue();
+			average+=key;
+			count++;
+		}
+		return average/count;
+	}
+	/**
 	 * the function calculates dif
 	 * @param Sig_User- signal from user input
 	 * @param Sig_csv- signal from csv files
@@ -97,31 +105,26 @@ public class HelpFunctions {
 	}
 	/**
 	 * the function calculates pi(weight)
-	 * @param Signals-list signal from user input
-	 * @param coa-array from csv files
-	 * @return pi
+	 * @param input for the calculation of pi_weight
+	 * @param data for the calculation of pi_weight
+	 * @return pi(weight)
 	 */
-	public double weight_pi(ArrayList<Integer> Signals, int[] coa)
+	public double weight_pi(ArrayList<WIFI> input,ArrayList<WIFI> data)
 	{
 		//variables
-		int sig1,sig2,sig3;
-		double dif1,dif2,dif3,w1,w2,w3,out=-1;
+		int sig=0;
+		double dif=0,w=1,out=1;
 		try {
-		//initialization for signals
-		sig1=Signals.get(0);
-		sig2=Signals.get(1);
-		sig3=Signals.get(2);
-		//initialization for different
-		dif1=Dif(sig1,coa[0]);
-		dif2=Dif(sig2,coa[1]);
-		dif3=Dif(sig3,coa[2]);
-		//initialization for weight
-		w1=norm/(Math.pow(dif1,sig_diff)*Math.pow(sig1, power));
-		w2=norm/(Math.pow(dif2,sig_diff)*Math.pow(sig2, power));
-		w3=norm/(Math.pow(dif3,sig_diff)*Math.pow(sig3, power));
-		out=w1*w2*w3;
+			for (int i=0;i<input.size();i++)
+			{
+				sig=input.get(i).getSignal();
+				dif=Dif(sig,data.get(i).getSignal());
+				w=norm/(Math.pow(dif,sig_diff)*Math.pow(sig, power));
+				out*=w;
+			}
 		}catch(NullPointerException e) {
 			JOptionPane.showMessageDialog(null,"not enough data");
+			return -1;
 		}
 		return out;
 	}
@@ -129,10 +132,10 @@ public class HelpFunctions {
 	 * Returns the limit rows with the highest weight values.
 	 * Implemented using Streams.
 	 */
-	public List<LaLoAlWe> limitRowsWithHighestWeight() {
+	public List<ALGOtwoCLASS> limitRowsWithHighestWeight() {
 		return points
 			.stream()
-			.sorted(Comparator.comparing(points -> -points.getWeight()))
+			.sorted(Comparator.comparing(points -> -points.getPi()))
 			.limit(limit)
 			.collect(Collectors.toList());
 	}
@@ -141,7 +144,7 @@ public class HelpFunctions {
 	 * @param items-locations and weight 
 	 * @return location by weighted average
 	 */
-	public Location WriteWeight2(List<LaLoAlWe> items)
+	public Location WriteWeight2(List<ALGOtwoCLASS> items)
 	{
 		Location w_center=new Location();
 		double[] sum = new double[LLAW];
@@ -152,8 +155,8 @@ public class HelpFunctions {
 			w_sum[i]=0;
 		if (items.isEmpty())
 			return null;
-		for(LaLoAlWe item : items){
-			double tmp_weight=item.getWeight();
+		for(ALGOtwoCLASS item : items){
+			double tmp_weight=item.getPi();
 			sum[3]+=tmp_weight;
 			sum[2]+=item.getLLA().getAlt()*tmp_weight;
 			sum[0]+=item.getLLA().getLat()*tmp_weight;
@@ -170,28 +173,22 @@ public class HelpFunctions {
 		return w_center;
 	}
 	/**
-	 * the function calculates the space according to 3 MAC and gives out the position according to the weight
-	 * @param list_coa-data from csv files
-	 * @param Signals-signals from user input
+	 * the function calculates the space according to input and gives out the position according to the weight
+	 * @param input for the calculation of pi_weight
+	 * @param data for the calculation of pi_weight
 	 * @return the position according to the weight
 	 */
-	public Location WeightAlgo2(ArrayList<ClassOfAlgorithm1> list_coa,ArrayList<Integer> Signals)
+	public Location WeightAlgo2(ArrayList<WIFI> input,ArrayList<ALGOtwoCLASS> data)
 	{
 		HelpFunctions hlpf = new HelpFunctions();
 		try{
-			for (ClassOfAlgorithm1 object: list_coa) 
+			for (int i=0;i<data.size();i++) 
 			{
-				int[] signals_object=new int[3];
-				int i=0;
-				double weight;
-				for (Map.Entry<Location,Integer> entry : object.getSignaList().entrySet())
-				{
-					signals_object[i++]=entry.getValue();
-				}
-				weight=weight_pi(Signals,signals_object);
+				double weight=weight_pi(input,data.get(i).getWiFi());
 				if (weight==-1)
 					System.exit(2);
-				hlpf.addAll(new LaLoAlWe(weight,WriteWeight(object)));
+				data.get(i).setPi(weight);
+				hlpf.addAll(data.get(i));
 			}
 			return WriteWeight2(hlpf.limitRowsWithHighestWeight());
 		}catch(NullPointerException e) {
@@ -239,116 +236,6 @@ public class HelpFunctions {
 		return coa;
 	}
 	/**
-	 * the function generates and set a placemark object, with the given statistical data
-	 * @param document structure of the KML file
-	 * @param folder to add wifi data
-	 * @param place location of wifi mark
-	 */
-	private void createPlacemarkWithChart(Document document, Folder folder,Location place)
-	{
-		try {
-			Placemark placemark = folder.createAndAddPlacemark();
-			//name of mark and style
-			placemark.withName("!!!HeRe!!!").withStyleUrl("#style_place")
-			//description of mark
-			.withDescription("Algorithm 1");
-			//set coordinates
-			placemark.createAndSetPoint().addToCoordinates(place.getLon(),place.getLat(),place.getAlt());
-		}catch(NullPointerException e) {
-			JOptionPane.showMessageDialog(null, "Why null????");
-		}
-	}
-	/**
-	 * the function generates and set a placemark object, with the given statistical data
-	 * @param document structure of the KML file
-	 * @param folder to add wifi data
-	 * @param place location of wifi mark
-	 * @param dwf wifi data of wifi mark 
-	 */
-	private void createPlacemarkWithChart(Document document, Folder folder,Location place,WIFI dwf)
-	{
-		try {
-			Placemark placemark = folder.createAndAddPlacemark();
-			//name of mark and style
-			placemark.withName(dwf.getSSID()).withStyleUrl("#style_place")
-			//description of mark
-			.withDescription("MAC: "+dwf.getMAC()+"<br/>Frequency: <b>"+dwf.getFrequency()+"</b><br/>Signal: <b>"+dwf.getSignal()+"</b>");
-			//set coordinates
-			placemark.createAndSetPoint().addToCoordinates(place.getLon(),place.getLat(),place.getAlt());
-		}catch(NullPointerException e) {
-			JOptionPane.showMessageDialog(null, "Why null????");
-		}
-	}
-	/**
-	 * the function write kml file
-	 * @param dwf list of data for kml file
-	 */
-	public void WriteKML(ArrayList<DataWIFI> dwf,Location center) throws IOException
-	{
-		//variables
-        String OUTkmlFile="";								//output kml file
-		final Kml kml = new Kml();
-		Document doc = kml.createAndSetDocument().withName("WIFI").withOpen(true);
-		//create a Folder
-		Folder folder = doc.createAndAddFolder();
-		folder.withName("WiFi Signal").withOpen(true);
-        //select the location of the file
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("*.KML","*.*");
-        JFileChooser fc = new JFileChooser();
-        fc.setFileFilter(filter);
-        if ( fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION ) {
-            try {
-            	//user wrote at the end kml
-            	if (fc.getSelectedFile().getAbsolutePath().substring(fc.getSelectedFile().getAbsolutePath().length()-4).equals(".kml"))
-            		OUTkmlFile=fc.getSelectedFile().getAbsolutePath();
-            	else	//user did not wrote at the end kml
-            		OUTkmlFile=fc.getSelectedFile().getAbsolutePath()+".kml";
-            }
-            catch (Exception e ) {
-            	JOptionPane.showMessageDialog(null, "an error occurred, the file was not saved.\ngoodbye");
-    	    	return;
-            }
-        }
-        else	//user did not select a file to save
-        {
-        	JOptionPane.showMessageDialog(null, "you did not select a file to save,\ngoodbye");
-	    	return;
-        }
-        //create placemark elements
-        try {
-        	Icon icon = new Icon()
-        	.withHref("http://maps.google.com/mapfiles/ms/icons/green-dot.png");
-        	Style style = doc.createAndAddStyle();
-        	style.withId("style_place") // set the stylename to use this style from the placemark
-        	.createAndSetIconStyle().withScale(1.0).withIcon(icon); // set size and icon
-        	style.createAndSetLabelStyle().withColor("ff0ff0ff").withScale(1.0); // set color and size of the wifi name
-        	//wifi data
-	        for (int j=0;j<dwf.size();j++)
-	        {
-	        	int counter=dwf.get(j).getWIFINetwork();
-	            int i=0;
-	            while (counter!=0)
-	            {
-	            	//create placemark for wifi
-	            	try {
-	            		createPlacemarkWithChart(doc,folder,dwf.get(j).getLla(),dwf.get(j).getWiFi().get(i));
-	            	}catch(IndexOutOfBoundsException e){
-	                	System.out.println("Err");
-	                }
-	                counter--;
-	                i++;
-	            }
-	        }
-	        createPlacemarkWithChart(doc,folder,center);
-        }catch (Exception e){
-    		JOptionPane.showMessageDialog(null, "kml record not saved");
-     		return;
-    	}
-        //print and save
-		kml.marshal(new FileWriter(OUTkmlFile,false));
-        JOptionPane.showMessageDialog(null, "kml record saved");
-	}
-	/**
 	 * the function translates information from the map into one list
 	 * @param dwf map of DataWIFI and MAC names data 
 	 * @return list of DataWIFI
@@ -364,6 +251,72 @@ public class HelpFunctions {
 				out.addAll(value);
 			}
 			return out;
+		}catch(NullPointerException e) {
+			return null;
+		}
+	}
+	/**
+	 * the function determines whether two lists have similar points
+	 * @param WiFi1 list of which we must find
+	 * @param WiFi2 list from the database
+	 * @return true-similar points are, false-similar points are not 
+	 */
+	public boolean HelpToFind(ArrayList<WIFI> WiFi1,ArrayList<WIFI> WiFi2)
+	{
+		try {
+			for (int i=0;i<WiFi1.size();i++)
+				for (int j=0;j<WiFi2.size();j++)
+					if (WiFi1.get(i).getMAC().equals(WiFi2.get(j).getMAC()))
+						return true;
+			return false;
+		}catch(NullPointerException e) {
+			System.out.println("Why NULL :(");
+			return false;
+		}
+	}
+	/**
+	 * the function looks for a similar point in the list
+	 * @param WiFi1 Wifi what we are looking for in the list
+	 * @param WiFi2 WiFi list from the database
+	 * @return similar point or point with signal -120
+	 */
+	public WIFI DataToFind(WIFI WiFi1,ArrayList<WIFI> WiFi2)
+	{
+		WIFI tmp=new WIFI();
+		try{
+			tmp.setSignal(-120);		tmp.setMAC(WiFi1.getMAC());		tmp.setFrequency(WiFi1.getFrequency());		tmp.setSSID(WiFi1.getSSID());
+			for (int i=0;i<WiFi2.size();i++)
+				if (WiFi1.getMAC().equals(WiFi2.get(i).getMAC()))
+					return WiFi2.get(i);
+			return tmp;
+		}catch(NullPointerException e) {
+			return null;
+		}
+	}
+	/**
+	 * the function finds the necessary data in the database for the second algorithm
+	 * @param DWF database
+	 * @param WiFi the list of which we must find
+	 * @return the necessary data in the database for the second algorithm
+	 */
+	public ArrayList<ALGOtwoCLASS> Find(ArrayList<DataWIFI> DWF,ArrayList<WIFI> WiFi)
+	{
+		ArrayList<ALGOtwoCLASS> tmp_atc=new ArrayList<ALGOtwoCLASS>();
+		try {
+			for (int i=0;i<DWF.size();i++)
+				for (int j=0;j<DWF.get(i).getWiFi().size();j++)
+				{
+					ALGOtwoCLASS tmp=new ALGOtwoCLASS();
+					tmp.setLLA(DWF.get(i).getLla());
+					if (HelpToFind(WiFi,DWF.get(i).getWiFi()))
+					{	
+						for (int k=0;k<WiFi.size();k++)
+							tmp.setWiFi(DataToFind(WiFi.get(k),DWF.get(i).getWiFi()));
+						tmp_atc.add(tmp);
+						break;
+					}
+				}
+			return tmp_atc;
 		}catch(NullPointerException e) {
 			return null;
 		}

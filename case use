@@ -1,0 +1,24 @@
+we have 3 sitution
+craete database:
+user: pogramer
+main file: testcsv
+Details:
+the pogramer/user puts file/s from wiglewifi app to the system. the system crate new csv file
+the new file contian all scans after cleaning the data as asked in Assignment explanation
+
+data analysis
+user: client / pogramer
+main file: 
+Details:
+the pogram read the csv file that created in testcsv . the pogram use filters and create new csv file as filters asks
+-new- 
+the pogram calclete the locition of the mac thet come from new scans withuot gps locition.
+
+
+
+View information
+user: client
+Details:
+the pogram read the csv file that created in testcsv . the pogram use filters and create new csv file as filters asks
+then the pogram make a kml file using the new csv file.
+the pogram return the kml file that can be open in google maps or google earth.

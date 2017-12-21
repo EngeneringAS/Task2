@@ -1,6 +1,6 @@
 package Ex2;
 /**
- * class for question 2
+ * class for algorithms, class for saving a place after calculations
  * @author Alexey Titov &   Shalom Weinberger
  * @version 2.0
  */

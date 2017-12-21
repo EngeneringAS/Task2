@@ -72,12 +72,13 @@ public class ALGORITHMtwo
                 	try {
                 		cnt+=tmpWF.setMAC(row.get(7+i*4));
                 		tmpWF.setSSID(row.get(6+i*4));
-                		cnt+=tmpWF.setSignal(Integer.parseInt(row.get(9+i*4)));
+                		cnt+=tmpWF.setSignal((int) Double.parseDouble(row.get(9+i*4)));
                 		cnt+=tmpWF.setFrequency(Integer.parseInt(row.get(8+i*4)));
                 		if (cnt!=3)
                 			continue;
                 		dwf.get(j).setWiFi(tmpWF);
                 	}catch(NumberFormatException e){
+                		System.out.println("Err, WIFI");
                 		continue;
                 	}
                 }
@@ -85,10 +86,10 @@ public class ALGORITHMtwo
 			}
 			row.close();
 		} catch (FileNotFoundException e) {
-			JOptionPane.showMessageDialog(null, "kml record not saved\nincorrect file");
+			JOptionPane.showMessageDialog(null, "csv record not saved\nincorrect file");
      		return dwf;
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, "kml record not saved\nincorrect file");
+			JOptionPane.showMessageDialog(null, "csv record not saved\nincorrect file");
      		return dwf;
 		}catch(IllegalArgumentException e) {
 			JOptionPane.showMessageDialog(null, "Why null????");
@@ -128,9 +129,6 @@ public class ALGORITHMtwo
 				boolean flagtime;			//flag for check time
                 //location
                 try{
-                	//cnt2+=place.setLat(Double.parseDouble(row.get(2)));
-                	//cnt2+=place.setLon(Double.parseDouble(row.get(3)));
-                	//place.setAlt(Double.parseDouble(row.get(4)));
                 	max=Integer.parseInt(row.get(5));
                 }catch(NumberFormatException e){
                 	System.out.println("Err: #WiFi network is no correct");	
@@ -150,26 +148,33 @@ public class ALGORITHMtwo
                 	try {
                 		cnt+=tmpWF.setMAC(row.get(7+i*4));
                 		tmpWF.setSSID(row.get(6+i*4));
-                		cnt+=tmpWF.setSignal(Integer.parseInt(row.get(9+i*4)));
+                		cnt+=tmpWF.setSignal((int) Double.parseDouble(row.get(9+i*4)));
                 		cnt+=tmpWF.setFrequency(Integer.parseInt(row.get(8+i*4)));
                 		if (cnt!=3)
                 			continue;
                 		dwf.get(j).setWiFi(tmpWF);
                 	}catch(NumberFormatException e){
+                		System.out.println("Err,WIFI");
                 		continue;
                 	}
                 }
                 j++;
                 ArrayList<ALGOtwoCLASS> data=hlp.Find(DWF,dwf.get(j-1).getWiFi());
                 place= hlp.WeightAlgo2(dwf.get(j-1).getWiFi(),data);
-                dwf.get(j-1).setLla(place);
+                if (place!=null)
+                	dwf.get(j-1).setLla(place);
+                else
+                {
+                	dwf.remove(j-1);
+                	j--;
+                }
 			}
 			row.close();
 		} catch (FileNotFoundException e) {
-			JOptionPane.showMessageDialog(null, "kml record not saved\nincorrect file");
+			JOptionPane.showMessageDialog(null, "csv record not saved\nincorrect file");
      		return dwf;
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, "kml record not saved\nincorrect file");
+			JOptionPane.showMessageDialog(null, "csv record not saved\nincorrect file");
      		return dwf;
 		}catch(IllegalArgumentException e) {
 			JOptionPane.showMessageDialog(null, "Why null????");
@@ -229,7 +234,7 @@ public class ALGORITHMtwo
 			}
 			csvOutput.close();
 			JOptionPane.showMessageDialog(null, "csv record saved");
-		} catch (IOException e) {
+		}catch (IOException e) {
 			JOptionPane.showMessageDialog(null, "csv record not saved");
 		}catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "csv record not saved");

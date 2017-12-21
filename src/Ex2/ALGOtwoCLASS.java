@@ -48,4 +48,9 @@ public class ALGOtwoCLASS {
 	{
 		this.WiFi.add(wiFi);
 	}
+	@Override
+	public String toString() {
+		return "ALGOtwoCLASS [pi=" + pi + ", LLA=" + LLA + ", WiFi=" + WiFi + "]";
+	}
+	
 }

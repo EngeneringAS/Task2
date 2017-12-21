@@ -1,6 +1,6 @@
 package Ex2;
 /**
- * class for question 2
+ * class for question 2, contains computational functions
  * @author Alexey Titov &   Shalom Weinberger
  * @version 2.0
  */
@@ -22,9 +22,9 @@ public class HelpFunctions {
 	private final int no_signal=-120;
 	private final int no_mysignal=0;
 	private final int diff_no_sig=100;
-	private final int limit=3;
+	private final int limit=4;
 	//variables
-	private List<ALGOtwoCLASS> points = new ArrayList<>();
+	private List<ALGOtwoCLASS> points= new ArrayList<>();
 	/**
 	 * the function adds data to the list
 	 * @param points-location and weight
@@ -95,7 +95,7 @@ public class HelpFunctions {
 	 * the function calculates dif
 	 * @param Sig_User- signal from user input
 	 * @param Sig_csv- signal from csv files
-	 * @return dif
+	 * @return different between signals
 	 */
 	public double Dif(int Sig_User,int Sig_csv)
 	{

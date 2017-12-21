@@ -91,7 +91,7 @@ public class ALGORITHMone
 							cnt+=wf.setFrequency(Integer.parseInt(row.get(4)));
 							cnt+=wf.setMAC(row.get(0));
 							wf.setSSID(row.get(1));
-							cnt+=wf.setSignal(Integer.parseInt(row.get(5)));
+							cnt+=wf.setSignal((int) Double.parseDouble(row.get(5)));
 						}catch(NumberFormatException e){
 							continue;
 						}
@@ -122,6 +122,7 @@ public class ALGORITHMone
 		//variable
 		String OUTcsvFile="";									//output csv file
 		HelpFunctions hlp=new HelpFunctions();
+		int index=1;											//counter of row
 		//select the location of the file
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("*.CSV","*.*");
 		JFileChooser fc = new JFileChooser();
@@ -147,6 +148,7 @@ public class ALGORITHMone
 			// use FileWriter constructor that specifies open for appending
 			CsvWriter csvOutput = new CsvWriter(new FileWriter(OUTcsvFile, false), ',');	
      		//headers for first row
+			csvOutput.write("¹");
 			csvOutput.write("latitude");	csvOutput.write("longitude");	csvOutput.write("altitude");
 			csvOutput.write("MAC");			csvOutput.write("Signal");
 			csvOutput.endRecord();
@@ -163,8 +165,9 @@ public class ALGORITHMone
 				for (int i=0;i<entry.getValue().size();i++)
 					coa.setSignaList(entry.getValue().get(i).getSignal(),entry.getValue().get(i).getLla());
 				center=hlp.WriteWeight(coa);
-				str=center.toString()+coa.getMAC()+","+hlp.AverageSignal(coa);
+				str=index+","+center.toString()+coa.getMAC()+","+hlp.AverageSignal(coa);
 				csvOutput.writeRecord(str.split(","));
+				index++;
 			}
 			csvOutput.close();
 			JOptionPane.showMessageDialog(null, "csv record saved");
